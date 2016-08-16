@@ -12,6 +12,8 @@ Imports::
     >>> from dateutil.relativedelta import relativedelta
     >>> from decimal import Decimal
     >>> from proteus import config, Model, Wizard
+    >>> from trytond.modules.company.tests.tools import create_company, \
+    ...     get_company
     >>> today = datetime.date.today()
 
 Create database::
@@ -19,40 +21,19 @@ Create database::
     >>> config = config.set_trytond()
     >>> config.pool.test = True
 
-Install purchase_lot_cost::
+Install stock_quality_control_trigger_lot::
 
-    >>> Module = Model.get('ir.module.module')
+    >>> Module = Model.get('ir.module')
     >>> modules = Module.find([
     ...         ('name', '=', 'stock_quality_control_trigger_lot'),
     ...         ])
     >>> Module.install([x.id for x in modules], config.context)
-    >>> Wizard('ir.module.module.install_upgrade').execute('upgrade')
+    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
 
 Create company::
 
-    >>> Currency = Model.get('currency.currency')
-    >>> CurrencyRate = Model.get('currency.currency.rate')
-    >>> Company = Model.get('company.company')
-    >>> Party = Model.get('party.party')
-    >>> company_config = Wizard('company.company.config')
-    >>> company_config.execute('company')
-    >>> company = company_config.form
-    >>> party = Party(name='B2CK')
-    >>> party.save()
-    >>> company.party = party
-    >>> currencies = Currency.find([('code', '=', 'EUR')])
-    >>> if not currencies:
-    ...     currency = Currency(name='Euro', symbol=u'€', code='EUR',
-    ...         rounding=Decimal('0.01'), mon_grouping='[3, 3, 0]',
-    ...         mon_decimal_point=',')
-    ...     currency.save()
-    ...     CurrencyRate(date=today + relativedelta(month=1, day=1),
-    ...         rate=Decimal('1.0'), currency=currency).save()
-    ... else:
-    ...     currency, = currencies
-    >>> company.currency = currency
-    >>> company_config.execute('add')
-    >>> company, = Company.find()
+    >>> _ = create_company()
+    >>> company = get_company()
 
 Reload the context::
 
@@ -67,12 +48,6 @@ Create supplier and customer::
     >>> customer = Party(name='Customer')
     >>> customer.save()
 
-Create category::
-
-    >>> ProductCategory = Model.get('product.category')
-    >>> category = ProductCategory(name='Category')
-    >>> category.save()
-
 Create products::
 
     >>> ProductUom = Model.get('product.uom')
@@ -82,7 +57,6 @@ Create products::
     >>> product1 = Product()
     >>> template1 = ProductTemplate()
     >>> template1.name = 'Product 1'
-    >>> template1.category = category
     >>> template1.default_uom = unit
     >>> template1.type = 'goods'
     >>> template1.list_price = Decimal('20')
@@ -93,7 +67,6 @@ Create products::
     >>> product2 = Product()
     >>> template2 = ProductTemplate()
     >>> template2.name = 'Product 2'
-    >>> template2.category = category
     >>> template2.default_uom = unit
     >>> template2.type = 'goods'
     >>> template2.list_price = Decimal('20')
@@ -162,7 +135,6 @@ Create Shipment In::
     >>> shipment_in.planned_date = today
     >>> shipment_in.supplier = supplier
     >>> shipment_in.warehouse = warehouse_loc
-    >>> shipment_in.company = company
 
 Add three shipment lines of product 1 and one of product 2::
 
@@ -175,9 +147,7 @@ Add three shipment lines of product 1 and one of product 2::
     ...     move.quantity = 1
     ...     move.from_location = supplier_loc
     ...     move.to_location = input_loc
-    ...     move.company = company
     ...     move.unit_price = Decimal('1')
-    ...     move.currency = currency
     >>> move = StockMove()
     >>> shipment_in.incoming_moves.append(move)
     >>> move.product = product2
@@ -185,9 +155,7 @@ Add three shipment lines of product 1 and one of product 2::
     >>> move.quantity = 3
     >>> move.from_location = supplier_loc
     >>> move.to_location = input_loc
-    >>> move.company = company
     >>> move.unit_price = Decimal('1')
-    >>> move.currency = currency
     >>> shipment_in.save()
 
 Create two Lots of Product 1 and set them to the shipment lines (two lines with
@@ -247,7 +215,6 @@ Create Shipment Out::
     >>> shipment_out.planned_date = today
     >>> shipment_out.customer = customer
     >>> shipment_out.warehouse = warehouse_loc
-    >>> shipment_out.company = company
 
 Add one line of product 1 and one of product 2::
 
@@ -261,9 +228,7 @@ Add one line of product 1 and one of product 2::
     ...     move.quantity = 1
     ...     move.from_location = output_loc
     ...     move.to_location = customer_loc
-    ...     move.company = company
     ...     move.unit_price = Decimal('1')
-    ...     move.currency = currency
     ...     product_tmp = product2
     ...     lot_tmp = lot3
     >>> shipment_out.save()
@@ -308,7 +273,6 @@ Create Shipment Internal::
     >>> shipment_internal.planned_date = today
     >>> shipment_internal.from_location = storage_loc
     >>> shipment_internal.to_location = internal_loc
-    >>> shipment_internal.company = company
 
 Add one line of product 1 and one of product 2::
 
@@ -322,9 +286,7 @@ Add one line of product 1 and one of product 2::
     ...     move.quantity = 1
     ...     move.from_location = storage_loc
     ...     move.to_location = internal_loc
-    ...     move.company = company
     ...     move.unit_price = Decimal('1')
-    ...     move.currency = currency
     ...     product_tmp = product2
     ...     lot_tmp = lot3
     >>> shipment_internal.save()
