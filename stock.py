@@ -1,14 +1,13 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from trytond.pool import PoolMeta
-
-from trytond.modules.quality_control_trigger import QualityControlTriggerMixin
+from trytond.modules.quality_control_trigger.quality import (
+    QualityControlTriggerMixin)
 
 __all__ = ['QualityTemplate', 'ShipmentIn', 'ShipmentOut', 'ShipmentInternal']
-__metaclass__ = PoolMeta
 
 
-class QualityTemplate:
+class QualityTemplate(metaclass=PoolMeta):
     __name__ = 'quality.template'
 
     @classmethod
@@ -23,8 +22,7 @@ class QualityTemplate:
         return models
 
 
-class ShipmentIn(QualityControlTriggerMixin):
-    __metaclass__ = PoolMeta
+class ShipmentIn(QualityControlTriggerMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.in'
 
     @classmethod
@@ -40,8 +38,7 @@ class ShipmentIn(QualityControlTriggerMixin):
             if m.state == 'done' and m.product == template.document and m.lot)
 
 
-class ShipmentOut(QualityControlTriggerMixin):
-    __metaclass__ = PoolMeta
+class ShipmentOut(QualityControlTriggerMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
 
     @classmethod
@@ -57,8 +54,7 @@ class ShipmentOut(QualityControlTriggerMixin):
             if m.state == 'done' and m.product == template.document and m.lot)
 
 
-class ShipmentInternal(QualityControlTriggerMixin):
-    __metaclass__ = PoolMeta
+class ShipmentInternal(QualityControlTriggerMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.internal'
 
     @classmethod

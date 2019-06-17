@@ -2,33 +2,20 @@
 Quality Control Trigger by Lot on Shipments Scenario
 ====================================================
 
-=============
-General Setup
-=============
-
 Imports::
 
     >>> import datetime
     >>> from dateutil.relativedelta import relativedelta
     >>> from decimal import Decimal
-    >>> from proteus import config, Model, Wizard
+    >>> from proteus import config, Model
+    >>> from trytond.tests.tools import activate_modules
     >>> from trytond.modules.company.tests.tools import create_company, \
     ...     get_company
     >>> today = datetime.date.today()
 
-Create database::
+Activate module::
 
-    >>> config = config.set_trytond()
-    >>> config.pool.test = True
-
-Install stock_quality_control_trigger_lot::
-
-    >>> Module = Model.get('ir.module')
-    >>> modules = Module.find([
-    ...         ('name', '=', 'stock_quality_control_trigger_lot'),
-    ...         ])
-    >>> Module.install([x.id for x in modules], config.context)
-    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
+    >>> config = activate_modules('stock_quality_control_trigger_lot')
 
 Create company::
 
@@ -54,26 +41,20 @@ Create products::
     >>> ProductTemplate = Model.get('product.template')
     >>> Product = Model.get('product.product')
     >>> unit, = ProductUom.find([('name', '=', 'Unit')])
-    >>> product1 = Product()
     >>> template1 = ProductTemplate()
     >>> template1.name = 'Product 1'
     >>> template1.default_uom = unit
     >>> template1.type = 'goods'
     >>> template1.list_price = Decimal('20')
-    >>> template1.cost_price = Decimal('8')
     >>> template1.save()
-    >>> product1.template = template1
-    >>> product1.save()
-    >>> product2 = Product()
+    >>> product1, = template1.products
     >>> template2 = ProductTemplate()
     >>> template2.name = 'Product 2'
     >>> template2.default_uom = unit
     >>> template2.type = 'goods'
     >>> template2.list_price = Decimal('20')
-    >>> template2.cost_price = Decimal('8')
     >>> template2.save()
-    >>> product2.template = template2
-    >>> product2.save()
+    >>> product2, = template2.products
 
 Create Quality Configuration::
 
@@ -193,9 +174,9 @@ Receive products and set the state as Done::
     >>> ShipmentIn.done([shipment_in.id], config.context)
     >>> shipment_in.reload()
     >>> shipment_in.state
-    u'done'
-    >>> set([m.state for m in shipment_in.inventory_moves])
-    set([u'done'])
+    'done'
+    >>> {m.state for m in shipment_in.inventory_moves}
+    {'done'}
 
 Check the created Quality Tests::
 
@@ -244,17 +225,17 @@ Set the shipment state to waiting and then assign and pack it::
     2
     >>> len(shipment_out.inventory_moves)
     2
-    >>> set([m.state for m in shipment_out.outgoing_moves])
-    set([u'assigned'])
+    >>> {m.state for m in shipment_out.outgoing_moves}
+    {'assigned'}
 
 Set the state as Done::
 
     >>> ShipmentOut.done([shipment_out.id], config.context)
     >>> shipment_out.reload()
     >>> shipment_in.state
-    u'done'
-    >>> set([m.state for m in shipment_out.outgoing_moves])
-    set([u'done'])
+    'done'
+    >>> {m.state for m in shipment_out.outgoing_moves}
+    {'done'}
 
 Check the created Quality Tests::
 
@@ -297,17 +278,17 @@ Set the shipment state to waiting and then assign it::
     >>> ShipmentInternal.assign_try([shipment_internal.id], config.context)
     True
     >>> shipment_internal.reload()
-    >>> set([m.state for m in shipment_internal.moves])
-    set([u'assigned'])
+    >>> {m.state for m in shipment_internal.moves}
+    {'assigned'}
 
 Set the state as Done::
 
     >>> ShipmentInternal.done([shipment_internal.id], config.context)
     >>> shipment_internal.reload()
     >>> shipment_in.state
-    u'done'
-    >>> set([m.state for m in shipment_internal.moves])
-    set([u'done'])
+    'done'
+    >>> {m.state for m in shipment_internal.moves}
+    {'done'}
 
 Check the created Quality Tests::
 
