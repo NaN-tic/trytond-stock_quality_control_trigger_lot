@@ -1,70 +1,54 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
-from trytond.pool import PoolMeta
-from trytond.modules.quality_control_trigger.quality import (
-    QualityControlTriggerMixin)
-
-__all__ = ['QualityTemplate', 'ShipmentIn', 'ShipmentOut', 'ShipmentInternal']
-
-
-class QualityTemplate(metaclass=PoolMeta):
-    __name__ = 'quality.template'
-
-    @classmethod
-    def _get_trigger_generation_models_by_trigger_models(cls):
-        models = super(QualityTemplate,
-            cls)._get_trigger_generation_models_by_trigger_models()
-        for model_name in ('stock.shipment.in', 'stock.shipment.out',
-                'stock.shipment.internal'):
-            generated_models = models.setdefault(model_name, [])
-            if 'stock.lot' not in generated_models:
-                generated_models.append('stock.lot')
-        return models
+from trytond.pool import PoolMeta, Pool
+from trytond.model import fields
+from trytond.modules.stock_quality_control_trigger_lot.quality import (
+    CreateQualityTestsMixin)
 
 
-class ShipmentIn(QualityControlTriggerMixin, metaclass=PoolMeta):
+__all__ = ['ShipmentIn', 'ShipmentOut', 'ShipmentInternal', 'Lot']
+
+
+class ShipmentIn(metaclass=PoolMeta):
     __name__ = 'stock.shipment.in'
 
     @classmethod
-    def done(cls, shipments):
-        super(ShipmentIn, cls).done(shipments)
-        cls.create_quality_tests(shipments, 'stock.lot')
+    def receive(cls, shipments):
+        super().receive(shipments)
+        cls.create_lot_quality_tests(shipments, 'shipment_in')
 
-    def _get_quality_trigger_generation_instances(self, template):
-        if template.trigger_generation_model != 'stock.lot':
-            return super(ShipmentIn,
-                self)._get_quality_trigger_generation_instances(template)
-        return set(m.lot for m in self.inventory_moves
-            if m.state == 'done' and m.product == template.document and m.lot)
+    def lots_for_quality_tests(self):
+        return list(set(m.lot for m in self.incoming_moves if m.lot
+            and m.state == 'done' and m.product.shipment_in_quality_template))
 
 
-class ShipmentOut(QualityControlTriggerMixin, metaclass=PoolMeta):
+class ShipmentOut(CreateQualityTestsMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
 
     @classmethod
-    def done(cls, shipments):
-        super(ShipmentOut, cls).done(shipments)
-        cls.create_quality_tests(shipments, 'stock.lot')
+    def pack(cls, shipments):
+        super().pack(shipments)
+        cls.create_lot_quality_tests(shipments, 'shipment_out')
 
-    def _get_quality_trigger_generation_instances(self, template):
-        if template.trigger_generation_model != 'stock.lot':
-            return super(ShipmentOut,
-                self)._get_quality_trigger_generation_instances(template)
-        return set(m.lot for m in self.outgoing_moves
-            if m.state == 'done' and m.product == template.document and m.lot)
+    def lots_for_quality_tests(self):
+        return list(set(m.lot for m in self.outgoing_moves if m.lot
+            and m.state == 'assigned' and m.product.shipment_out_quality_template))
 
 
-class ShipmentInternal(QualityControlTriggerMixin, metaclass=PoolMeta):
+class ShipmentInternal(CreateQualityTestsMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.internal'
 
     @classmethod
-    def done(cls, shipments):
-        super(ShipmentInternal, cls).done(shipments)
-        cls.create_quality_tests(shipments, 'stock.lot')
+    def assign(cls, shipments):
+        super().assign(shipments)
+        cls.create_lot_quality_tests(shipments, 'shipment_internal')
 
-    def _get_quality_trigger_generation_instances(self, template):
-        if template.trigger_generation_model != 'stock.lot':
-            return super(ShipmentInternal,
-                self)._get_quality_trigger_generation_instances(template)
-        return set(m.lot for m in self.moves
-            if m.state == 'done' and m.product == template.document and m.lot)
+    def lots_for_quality_tests(self):
+        return list(set(m.lot for m in self.moves if m.lot and m.state == 'assigned'
+            and m.product.shipment_internal_quality_template))
+
+
+class Lot(metaclass=PoolMeta):
+    __name__ = 'stock.lot'
+    quality_tests = fields.One2Many('quality.test', 'document', 'Tests',
+        readonly=True)
