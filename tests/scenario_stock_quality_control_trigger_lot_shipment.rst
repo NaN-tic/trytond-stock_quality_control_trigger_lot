@@ -182,10 +182,10 @@ Check the created Quality Tests::
     >>> QualityTest = Model.get('quality.test')
     >>> tests_in = QualityTest.find([])
     >>> len(tests_in)
-    2
-    >>> tests_in[0].document in (lot1, lot2)
+    3
+    >>> tests_in[0].document in (lot1, lot2, lot3)
     True
-    >>> tests_in[1].document in (lot1, lot2)
+    >>> tests_in[1].document in (lot1, lot2, lot3)
     True
 
 Create Shipment Out::
@@ -227,7 +227,7 @@ Set the shipment state to waiting and then assign and pack it::
     >>> {m.state for m in shipment_out.outgoing_moves}
     {'assigned'}
 
-Set the state as Done::
+Set the state as Received::
 
     >>> ShipmentOut.done([shipment_out.id], config.context)
     >>> shipment_out.reload()
@@ -242,8 +242,10 @@ Check the created Quality Tests::
     ...         ('id', 'not in', [t.id for t in tests_in]),
     ...         ])
     >>> len(tests_out)
-    1
-    >>> tests_out[0].document == lot1
+    2
+    >>> tests_out[1].document == lot1
+    True
+    >>> tests_out[0].document == lot3
     True
 
 Create Shipment Internal::
@@ -294,6 +296,6 @@ Check the created Quality Tests::
     >>> prev_test_ids = [t.id for t in tests_in] + [t.id for t in tests_out]
     >>> tests_internal = QualityTest.find([('id', 'not in', prev_test_ids)])
     >>> len(tests_internal)
-    1
-    >>> tests_internal[0].document == lot2
+    2
+    >>> tests_internal[1].document == lot2
     True

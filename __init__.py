@@ -1,13 +1,20 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from trytond.pool import Pool
-from .stock import *
+from . import product
+from . import production
+from . import quality
+from . import stock
 
+module = 'stock_quality_control_trigger_lot'
 
 def register():
     Pool.register(
-        QualityTemplate,
-        ShipmentIn,
-        ShipmentOut,
-        ShipmentInternal,
-        module='stock_quality_control_trigger_lot', type_='model')
+        product.Template,
+        production.Production,
+        quality.QualityTest,
+        stock.Lot,
+        stock.ShipmentIn,
+        stock.ShipmentOut,
+        stock.ShipmentInternal,
+        module=module, type_='model')
