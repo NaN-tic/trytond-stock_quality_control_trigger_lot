@@ -6,7 +6,10 @@ from trytond.modules.stock_quality_control_trigger_lot.quality import (
     CreateQualityTestsMixin)
 
 
-__all__ = ['Production']
+class Template(metaclass=PoolMeta):
+    __name__ = 'product.template'
+    production_quality_template = fields.Many2One('quality.template',
+        'Production Quality Template')
 
 
 class Production(CreateQualityTestsMixin, metaclass=PoolMeta):

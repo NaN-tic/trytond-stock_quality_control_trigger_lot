@@ -11,10 +11,14 @@ module = 'stock_quality_control_trigger_lot'
 def register():
     Pool.register(
         product.Template,
-        production.Production,
         quality.QualityTest,
         stock.Lot,
         stock.ShipmentIn,
         stock.ShipmentOut,
         stock.ShipmentInternal,
+        module=module, type_='model')
+    Pool.register(
+        production.Template,
+        production.Production,
+        depends=['production'],
         module=module, type_='model')
