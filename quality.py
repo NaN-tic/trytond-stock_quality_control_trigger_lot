@@ -24,7 +24,6 @@ class CreateQualityTestsMixin(object):
             if not lots:
                 continue
 
-
             to_create = []
             today = datetime.today()
             for lot in lots:
