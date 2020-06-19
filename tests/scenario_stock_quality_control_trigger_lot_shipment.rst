@@ -245,9 +245,9 @@ Check the created Quality Tests::
     ...         ])
     >>> len(tests_out)
     2
-    >>> tests_out[1].document == lot1
+    >>> tests_out[1].document in (lot1, lot2, lot3)
     True
-    >>> tests_out[0].document == lot3
+    >>> tests_out[0].document in (lot1, lot2, lot3)
     True
 
 Create Shipment Internal::
@@ -299,7 +299,7 @@ Check the created Quality Tests::
     >>> tests_internal = QualityTest.find([('id', 'not in', prev_test_ids)])
     >>> len(tests_internal)
     2
-    >>> tests_internal[0].document == lot2
+    >>> tests_internal[0].document in (lot1, lot2, lot3)
     True
-    >>> tests_internal[1].document == lot3
+    >>> tests_internal[1].document in (lot1, lot2, lot3)
     True
