@@ -32,17 +32,17 @@ class CreateQualityTestsMixin(object):
                 to_save.append(lot)
 
                 if (template == 'shipment_in' and
-                        lot.product.shipment_in_quality_template):
-                    used_template = lot.product.shipment_in_quality_template
+                        lot.product.template.shipment_in_quality_template):
+                    used_template = lot.product.template.shipment_in_quality_template
                 if (template == 'shipment_out' and
-                        lot.product.shipment_out_quality_template):
-                    used_template = lot.product.shipment_out_quality_template
+                        lot.product.template.shipment_out_quality_template):
+                    used_template = lot.product.template.shipment_out_quality_template
                 if (template == 'shipment_internal' and
-                        lot.product.shipment_internal_quality_template):
-                    used_template = lot.product.shipment_internal_quality_template
+                        lot.product.template.shipment_internal_quality_template):
+                    used_template = lot.product.template.shipment_internal_quality_template
                 if (template == 'production' and
-                        lot.product.production_quality_template):
-                    used_template = lot.product.production_quality_template
+                        lot.product.template.production_quality_template):
+                    used_template = lot.product.template.production_quality_template
 
                 if not template:
                     continue

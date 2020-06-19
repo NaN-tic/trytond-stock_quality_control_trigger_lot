@@ -79,18 +79,20 @@ Create Quality Configuration::
 Create Templates related to Product 1 with Shipments as Trigger model and
 Lot as generated model::
 
-    >>> Template = Model.get('quality.template')
-    >>> for model, name in (('stock.shipment.in', 'Shipment In'),
-    ...         ('stock.shipment.out', 'Shipment Out'),
-    ...         ('stock.shipment.internal', 'Shipment Internal')):
-    ...     template = Template()
-    ...     template.name = 'Template %s' % name
-    ...     template.document = product1
-    ...     template.internal_description='Quality Control on %s' % name
-    ...     template.external_description='External description'
-    ...     template.trigger_model = model
-    ...     template.trigger_generation_model = 'stock.lot'
-    ...     template.save()
+    >>> QualityTemplate = Model.get('quality.template')
+    >>> for model, name, fieldname in (('stock.shipment.in', 'Shipment In', 'shipment_in_quality_template'),
+    ...         ('stock.shipment.out', 'Shipment Out', 'shipment_out_quality_template'),
+    ...         ('stock.shipment.internal', 'Shipment Internal', 'shipment_internal_quality_template')):
+    ...     qtemplate = QualityTemplate()
+    ...     qtemplate.name = 'Template %s' % name
+    ...     qtemplate.document = product1
+    ...     qtemplate.internal_description='Quality Control on %s' % name
+    ...     qtemplate.external_description='External description'
+    ...     qtemplate.save()
+    ...     setattr(template1, fieldname, qtemplate)
+    ...     template1.save()
+    ...     setattr(template2, fieldname, qtemplate)
+    ...     template2.save()
 
 Get stock locations and create new internal location::
 
@@ -297,5 +299,7 @@ Check the created Quality Tests::
     >>> tests_internal = QualityTest.find([('id', 'not in', prev_test_ids)])
     >>> len(tests_internal)
     2
-    >>> tests_internal[1].document == lot2
+    >>> tests_internal[0].document == lot2
+    True
+    >>> tests_internal[1].document == lot3
     True

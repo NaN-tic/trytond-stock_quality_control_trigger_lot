@@ -9,7 +9,7 @@ from trytond.modules.stock_quality_control_trigger_lot.quality import (
 __all__ = ['ShipmentIn', 'ShipmentOut', 'ShipmentInternal', 'Lot']
 
 
-class ShipmentIn(metaclass=PoolMeta):
+class ShipmentIn(CreateQualityTestsMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.in'
 
     @classmethod
@@ -19,7 +19,7 @@ class ShipmentIn(metaclass=PoolMeta):
 
     def lots_for_quality_tests(self):
         return list(set(m.lot for m in self.incoming_moves if m.lot
-            and m.state == 'done' and m.product.shipment_in_quality_template))
+            and m.state == 'done' and m.product.template.shipment_in_quality_template))
 
 
 class ShipmentOut(CreateQualityTestsMixin, metaclass=PoolMeta):
@@ -32,7 +32,7 @@ class ShipmentOut(CreateQualityTestsMixin, metaclass=PoolMeta):
 
     def lots_for_quality_tests(self):
         return list(set(m.lot for m in self.outgoing_moves if m.lot
-            and m.state == 'assigned' and m.product.shipment_out_quality_template))
+            and m.state == 'assigned' and m.product.template.shipment_out_quality_template))
 
 
 class ShipmentInternal(CreateQualityTestsMixin, metaclass=PoolMeta):
@@ -45,7 +45,7 @@ class ShipmentInternal(CreateQualityTestsMixin, metaclass=PoolMeta):
 
     def lots_for_quality_tests(self):
         return list(set(m.lot for m in self.moves if m.lot and m.state == 'assigned'
-            and m.product.shipment_internal_quality_template))
+            and m.product.template.shipment_internal_quality_template))
 
 
 class Lot(metaclass=PoolMeta):
