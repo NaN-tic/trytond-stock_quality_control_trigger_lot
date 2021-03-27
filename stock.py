@@ -1,12 +1,9 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
-from trytond.pool import PoolMeta, Pool
+from trytond.pool import PoolMeta
 from trytond.model import fields
 from trytond.modules.stock_quality_control_trigger_lot.quality import (
     CreateQualityTestsMixin)
-
-
-__all__ = ['ShipmentIn', 'ShipmentOut', 'ShipmentInternal', 'Lot']
 
 
 class ShipmentIn(CreateQualityTestsMixin, metaclass=PoolMeta):

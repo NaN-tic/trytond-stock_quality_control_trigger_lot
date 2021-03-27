@@ -2,7 +2,6 @@
 #copyright notices and license terms.
 from trytond.model import fields
 from trytond.pool import PoolMeta
-from trytond.pyson import Eval
 
 
 class Template(metaclass=PoolMeta):
